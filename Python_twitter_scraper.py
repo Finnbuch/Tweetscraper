@@ -1,0 +1,190 @@
+
+####  Created by Finn Buchrieser ####
+###        Twitter Scraper       ####
+
+from math import nan
+import time
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import pandas as pd
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+import numpy as np
+
+class Twitter_Scraper :
+
+    def __init__(self, config_dict): 
+        self.tweet_list = []
+        self.driver = ""
+        self.whole_df = None
+        self.neutral_df = None
+        self.positive_df = None
+        self.negative_df = None
+        self.config_dict = config_dict
+        self.search_term = self.config_dict["search_term"]
+        self.min_reply = self.config_dict["search_min_replys"]
+        self.min_faves = self.config_dict["search_min_faves"]
+        self.min_retweets = self.config_dict["search_min_retweets"]
+        self.search_language = self.config_dict["language"]
+        self.search_until = self.config_dict["search_until"]
+        self.search_since = self.config_dict["search_since"]
+    #get tweets function
+    def tweet_scraper(self, card):
+        try:
+            username = card.find_element_by_xpath('.//span').text
+        except (NoSuchElementException, StaleElementReferenceException):
+            return
+        try:
+            handle = card.find_element_by_xpath('.//span[contains(text(), "@")]').text
+        except (NoSuchElementException, StaleElementReferenceException):
+            return
+        try:
+            postdate = card.find_element_by_xpath('.//time').get_attribute('datetime')
+        except (NoSuchElementException, StaleElementReferenceException):
+            return
+        try:
+            comment = card.find_element_by_xpath('.//div[2]/.//div[2]/div[1]/div[1]//span').text
+        except (NoSuchElementException, StaleElementReferenceException):
+            return
+        try:
+            responding = card.find_element_by_xpath('.//div[2]/div[2]/div[2]').text
+        except (NoSuchElementException, StaleElementReferenceException):
+            return
+        text = comment + responding
+        try:
+            reply_count = card.find_element_by_xpath('.//div[@data-testid="reply"]').text
+        except (NoSuchElementException, StaleElementReferenceException):
+            return
+        try:
+            retweet_count = card.find_element_by_xpath('.//div[@data-testid="retweet"]').text
+        except (NoSuchElementException, StaleElementReferenceException):
+            return
+        try:
+            like_count = card.find_element_by_xpath('.//div[@data-testid="like"]').text
+        except (NoSuchElementException, StaleElementReferenceException):
+            return
+        tweet = (username, handle, postdate, text, reply_count, retweet_count, like_count)
+        return tweet
+
+    def collect_tweets(self):
+        for i in range(self.config_dict["number_of_repetitions"]):
+            if self.whole_df != None:
+                self.search_until = self.whole_df["date"].min()
+                print(self.search_until)
+            #start driver
+            chrome_options = webdriver.ChromeOptions()
+            prefs = {"profile.managed_default_content_settings.images": 2}
+            chrome_options.add_experimental_option("prefs", prefs)
+            self.driver = webdriver.Chrome(self.config_dict["path_to_driver"], chrome_options=chrome_options)
+            self.driver.set_window_position(0, 0)
+            self.driver.set_window_size(1600, 1000)
+
+            #login
+            url = r'https://twitter.com/login'
+            self.driver.get(url)
+            time.sleep(1)
+            try:
+                email = self.driver.find_element_by_name('session[username_or_email]')
+                email.send_keys("kelofot861@ansomesa.com")
+                # email.send_keys(input("Input your Email here:"))
+                password = self.driver.find_element_by_name("session[password]")
+                password.send_keys("Abcd1234")
+                #password.send_keys(getpass.getpass())
+                password.send_keys(Keys.RETURN)
+                if self.driver.current_url != "https://twitter.com/home":
+                    time.sleep(1)
+                    email = self.driver.find_element_by_name('session[username_or_email]')
+                    email.send_keys("Tscraper2")
+                    # email.send_keys(input("Input your Email here:"))
+                    password = self.driver.find_element_by_name("session[password]")
+                    password.send_keys("Abcd1234")
+                    #password.send_keys(getpass.getpass())
+                    password.send_keys(Keys.RETURN)
+            except (NoSuchElementException, StaleElementReferenceException):
+                return
+            if self.driver.current_url != "https://twitter.com/home":
+                time.sleep(1)
+                user = self.driver.find_element_by_name('username')
+                user.send_keys("Tscraper2")
+                # email.send_keys(input("Input your Email here:"))
+                password = self.driver.find_element_by_name("password")
+                password.send_keys("Abcd1234")
+                #password.send_keys(getpass.getpass())
+                password.send_keys(Keys.RETURN)
+            #search for keyword
+            time.sleep(3)
+
+            #searching
+            search_Hashtag = self.driver.find_element_by_xpath('//input[@aria-label="Search query"]')
+            search_Hashtag.send_keys(self.search_term + self.min_reply + self.min_faves + self.min_retweets + \
+            self.search_language + self.search_until + self.search_since)
+            search_Hashtag.send_keys(Keys.RETURN)
+            time.sleep(1)
+            latest_Tab = self.driver.find_element_by_xpath("//div[contains(text(),'Latest')]")
+            latest_Tab.click()
+
+            #extract information
+            tweet_ids = set()
+            last_position = self.driver.execute_script("return window.pageYOffset;")
+            scrolling = True
+
+            #loop to add certain amount of tweets 
+            while scrolling:
+                cards = self.driver.find_elements_by_xpath('//div[@data-testid="tweet"]')
+                for card in cards[-15:]:
+                    tweet = self.tweet_scraper(card)
+                    if tweet:
+                        tweet_id = ''.join(tweet)
+                        if tweet_id not in tweet_ids:
+                            tweet_ids.add(tweet_id)
+                            self.tweet_list.append(tweet)
+                if len(self.tweet_list) >= self.config_dict["number_of_tweets"] * (i + 1):
+                    break
+                
+                scroll_attempt = 0
+                while True:
+                    print(len(self.tweet_list))
+                    self.driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+                    time.sleep(0.75)
+                    curr_position = self.driver.execute_script("return window.pageYOffset;")
+                    if last_position == curr_position:
+                        scroll_attempt += 1
+
+                        if scroll_attempt >= 5:
+                            scrolling = False
+                            break
+                        else : 
+                            time.sleep(0.75)
+                    else:
+                        last_position = curr_position
+                        break
+    def preprocessing_data(self):
+        #Safe to a Pandas Dataframe
+        df = pd.DataFrame(self.tweet_list, columns =['name', 'handle', 'date', 'text', 'replys', 'retweets', 'likes'])
+        #self.driver.quit()
+        df.replace('', np.nan, inplace =True)
+        df.replace(nan, np.nan, inplace=True)
+        df.dropna()
+        df["date"] = pd.to_datetime(df["date"])
+        df = df.sort_values(by="date")
+        df.to_csv(self.config_dict["results_path"], sep = ",", index=False)
+        #Analyze Sentiment of Text
+        analyser = SentimentIntensityAnalyzer()
+        def sentiment_scores(sentence):
+            print(sentence)
+            snt = analyser.polarity_scores(sentence)
+            return snt
+        sentiment_list = []
+        for value in df.text:
+            sentiment_list.append(sentiment_scores(value)["compound"])
+        df["compound"] = sentiment_list
+
+        #calculating rolling mean of compound sentiment
+        df['sentiment'] = sentiment_list
+        df["rolling_sentiment"] = df["sentiment"].rolling(7).mean()
+        # with pd.option_context('display.max_rows', None, 'display.max_columns', None):  
+        #     print(df)
+        self.whole_df = df
+        self.positive_df = df[df["compound"] > 0.3]
+        self.neutral_df = df[(df["compound"] >= -0.3) & (df["compound"] <= 0.3)]
+        self.negative_df = df[df["compound"] < -0.3]
