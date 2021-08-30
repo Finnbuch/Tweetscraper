@@ -4,7 +4,7 @@ from Python_twitter_scraper import Twitter_Scraper
 from config_reader import ConfigReader
 
 Config_reader = ConfigReader()
-config_dict = ConfigReader.read_json_config("C:\\Users\\finn_arbeit\\Documents\\Twitter_scraper\\config.json")
+config_dict = ConfigReader.read_json_config("C:\\Users\\finnb\\OneDrive\\Dokumente\\Neuropsycho\\Twitter_scraper\\Tweetscraper\\config.json")
 #Getting the tweets
 scraper = Twitter_Scraper(config_dict)
 scraper.collect_tweets()
@@ -32,10 +32,10 @@ lineplot = LinePlotter()
 lineplot.mood_over_time(dataframe["date"], dataframe["rolling_sentiment"])
 
 #filtering data and creating a wordcloud
-title_list = ["All Words", "Neutral Words", "Negative Words", "Positive Words"]
-wordcloud_generator = WordCloudGeneration()
-clean_text_list = []
-for text in text_list:
-    clean_data = wordcloud_generator.preprocessing(text)
-    clean_text_list.append(clean_data)
-wordcloud_generator.create_word_cloud(clean_text_list, title_list)
+# title_list = ["All Words", "Neutral Words", "Negative Words", "Positive Words"]
+# wordcloud_generator = WordCloudGeneration()
+# clean_text_list = []
+# for text in text_list:
+#     clean_data = wordcloud_generator.preprocessing(text)
+#     clean_text_list.append(clean_data)
+# wordcloud_generator.create_word_cloud(clean_text_list, title_list)

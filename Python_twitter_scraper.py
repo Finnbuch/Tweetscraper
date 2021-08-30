@@ -20,6 +20,7 @@ class Twitter_Scraper :
         self.neutral_df = None
         self.positive_df = None
         self.negative_df = None
+        self.min_date = pd.Timestamp("2013-05-18 12:00:00", tz="Europe/Brussels")
         self.config_dict = config_dict
         self.search_term = self.config_dict["search_term"]
         self.min_reply = self.config_dict["search_min_replys"]
@@ -28,6 +29,7 @@ class Twitter_Scraper :
         self.search_language = self.config_dict["language"]
         self.search_until = self.config_dict["search_until"]
         self.search_since = self.config_dict["search_since"]
+        self.tweet_ids = set()
     #get tweets function
     def tweet_scraper(self, card):
         try:
@@ -67,10 +69,13 @@ class Twitter_Scraper :
         return tweet
 
     def collect_tweets(self):
+        
+        flag = 0
         for i in range(self.config_dict["number_of_repetitions"]):
-            if self.whole_df != None:
-                self.search_until = self.whole_df["date"].min()
-                print(self.search_until)
+            if len(self.tweet_list) != 0:
+                flag = 1
+                self.search_until = self.min_date
+                print("XXXXXXXXXXXXXXXXXXXXXXXX" + str(self.search_until))
             #start driver
             chrome_options = webdriver.ChromeOptions()
             prefs = {"profile.managed_default_content_settings.images": 2}
@@ -116,15 +121,23 @@ class Twitter_Scraper :
 
             #searching
             search_Hashtag = self.driver.find_element_by_xpath('//input[@aria-label="Search query"]')
-            search_Hashtag.send_keys(self.search_term + self.min_reply + self.min_faves + self.min_retweets + \
-            self.search_language + self.search_until + self.search_since)
+            search_string = self.search_term + self.min_reply + self.min_faves + self.min_retweets + self.search_language
+            if flag == 1:
+                self.search_until = str(self.search_until)
+                search_string = search_string + (self.search_until[:3] + " ")
+                search_string = search_string + (self.search_until[5:6] + " ")
+                search_string = search_string + (self.search_until[8:9] + " ")
+            else :
+                search_string = search_string + self.search_until
+            search_string = search_string + self.search_since
+            search_Hashtag.send_keys(search_string)
             search_Hashtag.send_keys(Keys.RETURN)
             time.sleep(1)
             latest_Tab = self.driver.find_element_by_xpath("//div[contains(text(),'Latest')]")
             latest_Tab.click()
 
             #extract information
-            tweet_ids = set()
+            
             last_position = self.driver.execute_script("return window.pageYOffset;")
             scrolling = True
 
@@ -133,10 +146,12 @@ class Twitter_Scraper :
                 cards = self.driver.find_elements_by_xpath('//div[@data-testid="tweet"]')
                 for card in cards[-15:]:
                     tweet = self.tweet_scraper(card)
+                    if pd.to_datetime(tweet[2]) < self.min_date:
+                        self.min_date = tweet[2]
                     if tweet:
                         tweet_id = ''.join(tweet)
-                        if tweet_id not in tweet_ids:
-                            tweet_ids.add(tweet_id)
+                        if tweet_id not in self.tweet_ids:
+                            self.tweet_ids.add(tweet_id)
                             self.tweet_list.append(tweet)
                 if len(self.tweet_list) >= self.config_dict["number_of_tweets"] * (i + 1):
                     break
@@ -158,6 +173,8 @@ class Twitter_Scraper :
                     else:
                         last_position = curr_position
                         break
+        self.driver.quit()
+
     def preprocessing_data(self):
         #Safe to a Pandas Dataframe
         df = pd.DataFrame(self.tweet_list, columns =['name', 'handle', 'date', 'text', 'replys', 'retweets', 'likes'])
