@@ -1,12 +1,12 @@
 { 	
-	"path_to_driver" : "C:\\Users\\finn_arbeit\\Documents\\Twitter_scraper\\chromedriver.exe",
-	"results_path" : "C:\\Users\\finn_arbeit\\Documents\\Twitter_scraper\\results.csv",
-	"number_of_tweets" : 500,
-	"number_of_repetitions" : 5,
+	"path_to_driver" : "C:\\Users\\finnb\\OneDrive\\Dokumente\\Neuropsycho\\Twitter_scraper\\Tweetscraper\\chromedriver.exe",
+	"results_path" : "C:\\Users\\finnb\\Onedrive\\Dokumente\\Neuropsycho\\Twitter_scraper\\Tweetscraper\\results.csv",
+	"number_of_tweets" : 50,
+	"number_of_repetitions" : 3,
 	"language" : "lang:en ",
 	"search_since" :  "since:2012-01-01",
 	"search_until" : "until:2021-08-26 ",
-	"search_term" : "$AMD ",
+	"search_term" : "Trump ",
 	"search_min_retweets" : "min_retweets:3 ",
 	"search_min_faves" : "min_faves:3 ",
 	"search_min_replys" : "min_replies:3 "
