@@ -4,7 +4,8 @@ from Python_twitter_scraper import Twitter_Scraper
 from config_reader import ConfigReader
 
 Config_reader = ConfigReader()
-config_dict = ConfigReader.read_json_config("C:\\Users\\finnb\\OneDrive\\Dokumente\\Neuropsycho\\Twitter_scraper\\Tweetscraper\\config.json")
+#config_dict = ConfigReader.read_json_config("C:\\Users\\finnb\\OneDrive\\Dokumente\\Neuropsycho\\Twitter_scraper\\Tweetscraper\\config.json")
+config_dict = ConfigReader.read_json_config("C:\\Users\\buchries\\Documents\\Twitter_scraping\\Tweetscraper\\config.json")
 #Getting the tweets
 scraper = Twitter_Scraper(config_dict)
 scraper.collect_tweets()
