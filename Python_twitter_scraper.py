@@ -93,34 +93,44 @@ class Twitter_Scraper :
             url = r'https://twitter.com/login'
             self.driver.get(url)
             time.sleep(random.uniform(1, 3))
-            try:
-                email = self.driver.find_element_by_name('session[username_or_email]')
-                email.send_keys("Scrapingaccoun2")
-                # email.send_keys(input("Input your Email here:"))
-                password = self.driver.find_element_by_name("session[password]")
-                password.send_keys("Abcd1234")
-                #password.send_keys(getpass.getpass())
-                password.send_keys(Keys.RETURN)
-                if self.driver.current_url != "https://twitter.com/home":
+            
+            if self.driver.current_url != "https://twitter.com/home":
+                try:
                     time.sleep(random.uniform(1, 3))
-                    email = self.driver.find_element_by_name('session[username_or_email]')
-                    email.send_keys("Tscraper2")
+                    user = self.driver.find_element_by_name('username')
+                    user.send_keys("Tscraper2")
+                    user.send_keys(Keys.RETURN)
                     # email.send_keys(input("Input your Email here:"))
-                    password = self.driver.find_element_by_name("session[password]")
+                    time.sleep(random.uniform(1, 3))
+                    password = self.driver.find_element_by_name("password")
                     password.send_keys("Abcd1234")
                     #password.send_keys(getpass.getpass())
                     password.send_keys(Keys.RETURN)
-            except (NoSuchElementException, StaleElementReferenceException):
-                return
-            if self.driver.current_url != "https://twitter.com/home":
-                time.sleep(random.uniform(1, 3))
-                user = self.driver.find_element_by_name('username')
-                user.send_keys("Tscraper2")
-                # email.send_keys(input("Input your Email here:"))
-                password = self.driver.find_element_by_name("password")
-                password.send_keys("Abcd1234")
-                #password.send_keys(getpass.getpass())
-                password.send_keys(Keys.RETURN)
+                except(NoSuchElementException, StaleElementReferenceException):
+                    return
+                if self.driver.current_url != "https://twitter.com/home":
+                    try:
+                        print("in try block 1")
+                        email = self.driver.find_element_by_name('session[username_or_email]')
+                        email.send_keys("Scrapingaccoun2")
+                        # email.send_keys(input("Input your Email here:"))
+                        password = self.driver.find_element_by_name("session[password]")
+                        password.send_keys("Abcd1234")
+                        #password.send_keys(getpass.getpass())
+                        password.send_keys(Keys.RETURN)
+                        if self.driver.current_url != "https://twitter.com/home":
+                            print("in try block 2")
+                            time.sleep(random.uniform(1, 3))
+                            email = self.driver.find_element_by_name('session[username_or_email]')
+                            email.send_keys("Tscraper2")
+                            # email.send_keys(input("Input your Email here:"))
+                            password = self.driver.find_element_by_name("session[password]")
+                            password.send_keys("Abcd1234")
+                            #password.send_keys(getpass.getpass())
+                            password.send_keys(Keys.RETURN)
+                    except (NoSuchElementException, StaleElementReferenceException):
+                        return
+            
             #search for keyword
             time.sleep(random.uniform(2, 4))
 
