@@ -9,5 +9,9 @@
 	"search_term" : "Trump ",
 	"search_min_retweets" : "min_retweets:2000 ",
 	"search_min_faves" : "min_faves:2000 ",
-	"search_min_replys" : "min_replies:2000 "
+	"search_min_replys" : "min_replies:2000 ",
+	"account_name" : "Tscraper3",
+	"account_email" : "dibapa6816@btkylj.com",
+	"account_password" : "AcbA2413"
+
 }

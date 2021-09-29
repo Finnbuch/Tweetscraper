@@ -31,6 +31,9 @@ class Twitter_Scraper :
         self.search_until = self.config_dict["search_until"]
         self.search_since = self.config_dict["search_since"]
         self.tweet_ids = set()
+        self.account_name = self.config_dict["account_name"]
+        self.account_email = self.config_dict["account_email"]
+        self.account_password = self.config_dict["account_password"]
     #get tweets function
     def tweet_scraper(self, card):
         try:
@@ -94,48 +97,66 @@ class Twitter_Scraper :
             self.driver.get(url)
             time.sleep(random.uniform(1, 3))
             
+
+            try:
+                time.sleep(random.uniform(1, 3))
+                user = self.driver.find_element_by_name('username')
+                user.send_keys(self.account_name)
+                user.send_keys(Keys.RETURN)
+                # email.send_keys(input("Input your Email here:"))
+                time.sleep(random.uniform(1, 3))
+                password = self.driver.find_element_by_name("password")
+                password.send_keys(self.account_password)
+                #password.send_keys(getpass.getpass())
+                password.send_keys(Keys.RETURN)
+                print("First login attempt successful")
+            except(NoSuchElementException, StaleElementReferenceException):
+                print("First login attempt failed")
+            
+            time.sleep(random.uniform(2, 3))
             if self.driver.current_url != "https://twitter.com/home":
                 try:
-                    time.sleep(random.uniform(1, 3))
-                    user = self.driver.find_element_by_name('username')
-                    user.send_keys("Tscraper2")
-                    user.send_keys(Keys.RETURN)
+                    email = self.driver.find_element_by_name('session[username_or_email]')
+                    email.send_keys(self.account_email)
                     # email.send_keys(input("Input your Email here:"))
-                    time.sleep(random.uniform(1, 3))
-                    password = self.driver.find_element_by_name("password")
-                    password.send_keys("Abcd1234")
+                    password = self.driver.find_element_by_name("session[password]")
+                    password.send_keys(self.account_password)
                     #password.send_keys(getpass.getpass())
                     password.send_keys(Keys.RETURN)
-                except(NoSuchElementException, StaleElementReferenceException):
-                    return
+                    print("Second login attempt successful")
+                except (NoSuchElementException, StaleElementReferenceException):
+                    print("Second login attempt failed")
+
+                time.sleep(random.uniform(2, 3))
                 if self.driver.current_url != "https://twitter.com/home":
                     try:
-                        print("in try block 1")
+                        time.sleep(random.uniform(1, 3))
                         email = self.driver.find_element_by_name('session[username_or_email]')
-                        email.send_keys("Scrapingaccoun2")
+                        email.send_keys("Tscraper2")
                         # email.send_keys(input("Input your Email here:"))
                         password = self.driver.find_element_by_name("session[password]")
                         password.send_keys("Abcd1234")
                         #password.send_keys(getpass.getpass())
                         password.send_keys(Keys.RETURN)
-                        if self.driver.current_url != "https://twitter.com/home":
-                            print("in try block 2")
-                            time.sleep(random.uniform(1, 3))
-                            email = self.driver.find_element_by_name('session[username_or_email]')
-                            email.send_keys("Tscraper2")
-                            # email.send_keys(input("Input your Email here:"))
-                            password = self.driver.find_element_by_name("session[password]")
-                            password.send_keys("Abcd1234")
-                            #password.send_keys(getpass.getpass())
-                            password.send_keys(Keys.RETURN)
+                        print("Third login attempt successful")
                     except (NoSuchElementException, StaleElementReferenceException):
-                        return
+                        print("Third login attempt failed")
             
             #search for keyword
             time.sleep(random.uniform(2, 4))
 
             #searching
-            search_Hashtag = self.driver.find_element_by_xpath('//input[@aria-label="Search query"]')
+            try:
+                search_Hashtag = self.driver.find_element_by_xpath('//input[@data-testid="SearchBox_Search_Input"]')
+                print("Search query successfully found")
+            except (NoSuchElementException, StaleElementReferenceException):
+                print("Search Query not found, trying again")
+            try:
+                search_Hashtag = self.driver.find_element_by_xpath('//input[@aria-label="Search query"]')
+                print("Search query successfully found")
+            except (NoSuchElementException, StaleElementReferenceException):
+                print("Search Query not found")
+                
             search_string = self.search_term + self.min_reply + self.min_faves + self.min_retweets + self.search_language
             if flag == 1:
                 self.search_until = str(self.search_until)
