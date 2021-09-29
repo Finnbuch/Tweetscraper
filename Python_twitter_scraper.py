@@ -78,12 +78,7 @@ class Twitter_Scraper :
         for i in range(self.config_dict["number_of_repetitions"]):
             if len(self.tweet_list) != 0:
                 flag = 1
-                print(self.search_until)
-                print("a")
-                print(self.min_date)
                 self.search_until = self.min_date
-                print("a")
-                print(self.search_until)
             #start driver
             chrome_options = webdriver.ChromeOptions()
             prefs = {"profile.managed_default_content_settings.images": 2}
@@ -144,18 +139,23 @@ class Twitter_Scraper :
             
             #search for keyword
             time.sleep(random.uniform(2, 4))
-
+            self.driver.refresh()
+            time.sleep(random.uniform(1, 2))
             #searching
+            search_flag = 0
             try:
                 search_Hashtag = self.driver.find_element_by_xpath('//input[@data-testid="SearchBox_Search_Input"]')
                 print("Search query successfully found")
+                search_flag = 1
             except (NoSuchElementException, StaleElementReferenceException):
                 print("Search Query not found, trying again")
-            try:
-                search_Hashtag = self.driver.find_element_by_xpath('//input[@aria-label="Search query"]')
-                print("Search query successfully found")
-            except (NoSuchElementException, StaleElementReferenceException):
-                print("Search Query not found")
+            
+            if search_flag == 0:
+                try:
+                    search_Hashtag = self.driver.find_element_by_xpath('//input[@aria-label="Search query"]')
+                    print("Search query successfully found")
+                except (NoSuchElementException, StaleElementReferenceException):
+                    print("Search Query not found")
                 
             search_string = self.search_term + self.min_reply + self.min_faves + self.min_retweets + self.search_language
             if flag == 1:
@@ -180,7 +180,9 @@ class Twitter_Scraper :
 
             #loop to add certain amount of tweets 
             while scrolling:
-                cards = self.driver.find_elements_by_xpath('//div[@data-testid="tweet"]')
+                time.sleep(0.5)
+                cards = self.driver.find_elements_by_xpath('//article[@data-testid="tweet"]')
+
                 for card in cards[-15:]:
                     tweet = self.tweet_scraper(card)
                     if pd.to_datetime(tweet[2]) < pd.to_datetime(self.min_date):
