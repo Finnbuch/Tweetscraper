@@ -81,18 +81,16 @@ class Twitter_Scraper :
                 self.search_until = self.min_date
             #start driver
             chrome_options = webdriver.ChromeOptions()
-            prefs = {"profile.managed_default_content_settings.images": 2}
-            chrome_options.add_experimental_option("prefs", prefs)
+            #prefs = {"profile.managed_default_content_settings.images": 2}
+            #chrome_options.add_experimental_option("prefs", prefs)
             self.driver = webdriver.Chrome(self.config_dict["path_to_driver"], chrome_options=chrome_options)
             self.driver.set_window_position(0, 0)
-            self.driver.set_window_size(1600, 1000)
+            self.driver.set_window_size(1400, 900)
 
             #login
             url = r'https://twitter.com/login'
             self.driver.get(url)
-            time.sleep(random.uniform(1, 3))
-            
-
+            time.sleep(random.uniform(2, 3))
             try:
                 time.sleep(random.uniform(1, 3))
                 user = self.driver.find_element_by_name('username')
